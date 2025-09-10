@@ -1,0 +1,14 @@
+[package]
+name = "advent-of-code-2024"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+members = [
+    "aoc-common",
+    "day-01",
+    "day-02",
+    "day-03",
+] 
+
+[dependencies]
