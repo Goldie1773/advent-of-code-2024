@@ -1,12 +1,5 @@
-use std::{collections::HashMap, fs::{self}, iter::zip};
-
-fn read_file(file_path: &str) -> String {
-    let input_text = fs::read_to_string(
-        format!("{}/{}", env!("CARGO_MANIFEST_DIR"), file_path)
-    ).expect("Could not read sample.txt");
-
-    input_text
-}
+use std::{collections::HashMap, iter::zip};
+use aoc_common::{read_file_manifest};
 
 fn split_input(input_text: &str) -> (Vec<i32>, Vec<i32>) {
     let mut left_list: Vec<i32> = Vec::new();
@@ -57,8 +50,7 @@ fn find_similarity_score(left: &[i32], right: &[i32]) -> u32 {
 
 fn main() {
 
-    let file_name = "input.txt";
-    let input_text = read_file(file_name);
+    let input_text = read_file_manifest!("input.txt");
 
     let (left_list, right_list) = split_input(&input_text);
     
