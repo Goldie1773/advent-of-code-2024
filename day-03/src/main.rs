@@ -2,7 +2,7 @@ use aoc_common::read_file_manifest;
 use regex::Regex;
 
 fn main() {
-    let input_text = read_file_manifest!("input.txt");
+    let input_text = read_file_manifest!("sample2.txt");
 
     let re = Regex::new(r"mul\(([0-9]+),([0-9]+)\)").unwrap();
     let mut mult_sum = 0;
@@ -12,4 +12,6 @@ fn main() {
     }
 
     println!("Total sum of multiplications is: {mult_sum}");
+
+    // Next step for part two: use regex to capture between each do and don't then use the current regex system inside of the captured group.
 }
