@@ -3,7 +3,7 @@ use aoc_common::read_file_manifest;
 // Helper: check if a transition satisfies our rules
 fn is_valid_transition(prev: i32, curr: i32, increasing: bool) -> bool {
     let diff = (curr - prev).abs();
-    diff >= 1 && diff <= 3 && ((curr > prev) == increasing)
+    (1..=3).contains(&diff) && ((curr > prev) == increasing)
 }
 
 // Check if report is valid for a given trend, optionally skipping one index
