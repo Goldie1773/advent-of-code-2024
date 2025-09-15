@@ -5,7 +5,6 @@ fn main() {
     let input_text = read_file_manifest!("input.txt");
 
     let re = Regex::new(r"mul\(([0-9]+,[0-9]+)\)|(don't\(\))|(do\(\))").unwrap();
-    
     let mut enabled = 1;
     let mut mult_sum = 0;
 
