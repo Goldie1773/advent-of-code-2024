@@ -13,10 +13,10 @@ fn main() {
             "do()" => enabled = 1,
             "don\'t()" => enabled = 0,
             _ => {
-               let nums: Vec<i32> = capt.split(",").map(|n| n.parse::<i32>().unwrap()).collect();
-               if enabled == 1 {
+                let nums: Vec<i32> = capt.split(",").map(|n| n.parse::<i32>().unwrap()).collect();
+                if enabled == 1 {
                     mult_sum += nums[0] * nums[1];
-               }
+                }
             }
         }
     }

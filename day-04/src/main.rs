@@ -1,11 +1,24 @@
 use aoc_common::read_file_manifest;
 
-fn check_xmas(grid: &Vec<Vec<char>>, x: isize, y: isize, dx: isize, dy: isize, rows: isize, cols: isize) -> bool {
+fn check_xmas(
+    grid: &Vec<Vec<char>>,
+    x: isize,
+    y: isize,
+    dx: isize,
+    dy: isize,
+    rows: isize,
+    cols: isize,
+) -> bool {
     let word = ['X', 'M', 'A', 'S'];
     for k in 0..4 {
         let nx = x + dx * k;
         let ny = y + dy * k;
-        if nx < 0 || nx >= rows || ny < 0 || ny >= cols || grid[nx as usize][ny as usize] != word[k as usize] {
+        if nx < 0
+            || nx >= rows
+            || ny < 0
+            || ny >= cols
+            || grid[nx as usize][ny as usize] != word[k as usize]
+        {
             return false;
         }
     }
@@ -39,7 +52,15 @@ fn main() {
             if grid[i][j] == 'X' {
                 // Check each direction from this 'X'
                 for &(dx, dy) in &directions {
-                    if check_xmas(&grid, i as isize, j as isize, dx, dy, rows as isize, cols as isize) {
+                    if check_xmas(
+                        &grid,
+                        i as isize,
+                        j as isize,
+                        dx,
+                        dy,
+                        rows as isize,
+                        cols as isize,
+                    ) {
                         xmas_count += 1;
                     }
                 }
