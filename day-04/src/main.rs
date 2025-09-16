@@ -47,5 +47,5 @@ fn main() {
         }
     }
 
-    println!("The total number of times 'XMAS' appears is: {xmas_count}");
+    println!("The total number of times 'XMAS' appears in the wordsearch is: {xmas_count}");
 }
