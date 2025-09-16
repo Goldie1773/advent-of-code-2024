@@ -11,10 +11,31 @@ env:
 
 jobs:
   format:
-
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
     - uses: actions/checkout@v4
-    - name: Format
-      run: cargo fmt
+      with:
+        token: ${{ secrets.GH_TOKEN }}
+        fetch-depth: 0
+
+    - name: Check format
+      id: check_fmt
+      run: |
+        if cargo fmt --check; then
+          echo "formatted=true" >> $GITHUB_OUTPUT
+        else
+          echo "formatted=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Format and commit if needed
+      if: steps.check_fmt.outputs.formatted == 'false' && !startsWith(github.event.head_commit.message, 'Auto-format')
+      run: |
+        cargo fmt
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git add .
+        git commit -m "Auto-format Rust code" || echo "No changes to commit"
+        git push origin master
