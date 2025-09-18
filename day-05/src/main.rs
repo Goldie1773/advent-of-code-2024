@@ -2,16 +2,16 @@ use std::{collections::{HashMap, HashSet}};
 
 use aoc_common::read_file_manifest;
 
-fn split_input(input: String) -> (String, String) {
+fn split_input(input: &str) -> (&str, &str) {
     let mut parts = input.split("\r\n\r\n");
-    let page_order = parts.next().unwrap_or("").to_string();
-    let updates = parts.next().unwrap_or("").to_string();
+    let page_order = parts.next().unwrap_or("");
+    let updates = parts.next().unwrap_or("");
     (page_order, updates)
 }
 
 fn main() {
     let input = read_file_manifest!("input.txt");
-    let (page_order, updates) = split_input(input);
+    let (page_order, updates) = split_input(&input);
 
     let mut order_map: HashMap<u32, Vec<u32>> = HashMap::new();
     
