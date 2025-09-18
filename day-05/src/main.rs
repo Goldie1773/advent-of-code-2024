@@ -1,4 +1,4 @@
-use std::{collections::HashMap, vec};
+use std::{collections::{HashMap, HashSet}};
 
 use aoc_common::read_file_manifest;
 
@@ -13,45 +13,39 @@ fn main() {
     let input = read_file_manifest!("input.txt");
     let (page_order, updates) = split_input(input);
 
-    let mut order_map: HashMap<String, Vec<String>> = HashMap::new();
+    let mut order_map: HashMap<u32, Vec<u32>> = HashMap::new();
+    
     for order in page_order.lines() {
-        let mut order = order.split("|");
-        let key = order.next().unwrap().to_string();
-        let value = order.next().unwrap().to_string();
-        if let Some(temp_v) = order_map.get_mut(&key) {
-            temp_v.push(value);
-        } else {
-            order_map.insert(key, vec![value]);
-        } 
+        let mut curr_order = order.split("|");
+        let key = curr_order.next().unwrap().parse::<u32>().unwrap();
+        let value = curr_order.next().unwrap().to_string().parse::<u32>().unwrap();
+        order_map.entry(key).or_insert_with(Vec::new).push(value); 
     }
 
     let mut total_sum = 0;    
 
     for update in updates.lines() {
-        let mut valid = true;
-        let mut stack: Vec<String> = Vec::new();
-        let update = update.split(",");
-        let middle_num: Vec<&str> = update.clone().collect();
-        let middle_num = middle_num[middle_num.len() / 2];
+        let update: Vec<u32> = update.split(",").map(|v| v.parse::<u32>().unwrap()).collect();
+        let middle_num = update[update.len() / 2];
 
-        'outer: for value in update {
-            if let Some(values) = order_map.get(value) {
-                for num in values.iter() {                    
-                    if stack.contains(num) == true {
+        let mut valid = true;
+        let mut stack: HashSet<u32> = HashSet::new();
+
+        for value in update {
+            if let Some(values) = order_map.get(&value) {
+                for num in values {                    
+                    if stack.contains(num) {
                         valid = false;
-                        break 'outer;
+                        break;
                     }
                 }
             }
-            stack.push(value.to_string());
+            if !valid {break;}
+            stack.insert(value);
         }
-        if valid == true { total_sum += middle_num.parse::<i32>().unwrap_or(0);}
+
+        if valid { total_sum += middle_num;}
     }
+
     println!("The total sum is {total_sum}");
-
-    // Implement hash map for storing the relationship between the ordering pairs | DONE
-    // Use a stack to add the inputs and check each key against the value in the map in order
-    // Once verified correct capture the middle index
-    // Discard updates not in the correct order
-
 }
