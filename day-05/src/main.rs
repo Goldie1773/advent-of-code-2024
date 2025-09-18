@@ -1,4 +1,4 @@
-use std::{collections::{HashMap, HashSet}};
+use std::collections::{HashMap, HashSet};
 
 use aoc_common::read_file_manifest;
 
@@ -14,18 +14,21 @@ fn main() {
     let (page_order, updates) = split_input(&input);
 
     let mut order_map: HashMap<u32, Vec<u32>> = HashMap::new();
-    
+
     for order in page_order.lines() {
         let mut curr_order = order.split("|");
         let key = curr_order.next().unwrap().parse::<u32>().unwrap();
         let value = curr_order.next().unwrap().parse::<u32>().unwrap();
-        order_map.entry(key).or_insert_with(Vec::new).push(value); 
+        order_map.entry(key).or_insert_with(Vec::new).push(value);
     }
 
     let mut total_sum = 0;
 
     for update in updates.lines() {
-        let update: Vec<u32> = update.split(",").map(|v| v.parse::<u32>().unwrap()).collect();
+        let update: Vec<u32> = update
+            .split(",")
+            .map(|v| v.parse::<u32>().unwrap())
+            .collect();
         let middle_num = update[update.len() / 2];
 
         let mut valid = true;
@@ -33,18 +36,22 @@ fn main() {
 
         for value in update {
             if let Some(values) = order_map.get(&value) {
-                for num in values {                    
+                for num in values {
                     if stack.contains(num) {
                         valid = false;
                         break;
                     }
                 }
             }
-            if !valid {break;}
+            if !valid {
+                break;
+            }
             stack.insert(value);
         }
 
-        if valid { total_sum += middle_num;}
+        if valid {
+            total_sum += middle_num;
+        }
     }
 
     println!("The total sum is {total_sum}");
