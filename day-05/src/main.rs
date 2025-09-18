@@ -22,10 +22,10 @@ fn main() {
             temp_v.push(value);
         } else {
             order_map.insert(key, vec![value]);
-        } 
+        }
     }
 
-    let mut total_sum = 0;    
+    let mut total_sum = 0;
 
     for update in updates.lines() {
         let mut valid = true;
@@ -36,7 +36,7 @@ fn main() {
 
         'outer: for value in update {
             if let Some(values) = order_map.get(value) {
-                for num in values.iter() {                    
+                for num in values.iter() {
                     if stack.contains(num) == true {
                         valid = false;
                         break 'outer;
@@ -45,7 +45,9 @@ fn main() {
             }
             stack.push(value.to_string());
         }
-        if valid == true { total_sum += middle_num.parse::<i32>().unwrap_or(0);}
+        if valid == true {
+            total_sum += middle_num.parse::<i32>().unwrap_or(0);
+        }
     }
     println!("The total sum is {total_sum}");
 
@@ -53,5 +55,4 @@ fn main() {
     // Use a stack to add the inputs and check each key against the value in the map in order
     // Once verified correct capture the middle index
     // Discard updates not in the correct order
-
 }
