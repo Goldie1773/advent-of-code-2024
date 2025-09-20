@@ -1,6 +1,5 @@
 use std::{
     collections::{HashMap, HashSet, VecDeque},
-    iter,
 };
 
 use aoc_common::read_file_manifest;
@@ -13,10 +12,10 @@ fn split_input(input: &str) -> (&str, &str) {
 }
 
 fn reorder_part_two(input: &Vec<u32>, order_map: &HashMap<u32, Vec<u32>>) -> u32 {
-    let pages_set: HashSet<u32> = input.iter().cloned().collect();
+    let pages_set: HashSet<u32> = input.iter().copied().collect();
 
-    let mut adj_list: HashMap<u32, Vec<u32>> = HashMap::new();
-    let mut in_degree: HashMap<u32, usize> = HashMap::new();
+    let mut adj_list: HashMap<u32, Vec<u32>> = HashMap::with_capacity(input.len());
+    let mut in_degree: HashMap<u32, usize> = HashMap::with_capacity(input.len());
 
     for &page in input {
         in_degree.insert(page, 0);
@@ -27,8 +26,8 @@ fn reorder_part_two(input: &Vec<u32>, order_map: &HashMap<u32, Vec<u32>>) -> u32
         if let Some(dependents) = order_map.get(&page) {
             for &dependent in dependents {
                 if pages_set.contains(&dependent) {
-                    adj_list.get_mut(&page).unwrap().push(dependent);
-                    *in_degree.get_mut(&dependent).unwrap() += 1;
+                    adj_list.entry(page).or_default().push(dependent);
+                    *in_degree.entry(dependent).or_insert(0) += 1;
                 }
             }
         }
@@ -38,11 +37,10 @@ fn reorder_part_two(input: &Vec<u32>, order_map: &HashMap<u32, Vec<u32>>) -> u32
     let mut queue: VecDeque<u32> = VecDeque::new();
     let mut sorted_order: Vec<u32> = Vec::new();
 
-    for (&page, &degree) in &in_degree {
-        if degree == 0 {
-            queue.push_back(page);
-        }
-    }
+    queue.extend(
+        in_degree.iter()
+            .filter_map(|(&page, &degree)| if degree == 0 { Some(page) } else { None })
+    );
 
     while let Some(current) = queue.pop_front() {
         sorted_order.push(current);
