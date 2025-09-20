@@ -1,6 +1,4 @@
-use std::{
-    collections::{HashMap, HashSet, VecDeque},
-};
+use std::collections::{HashMap, HashSet, VecDeque};
 
 use aoc_common::read_file_manifest;
 
@@ -38,8 +36,9 @@ fn reorder_part_two(input: &Vec<u32>, order_map: &HashMap<u32, Vec<u32>>) -> u32
     let mut sorted_order: Vec<u32> = Vec::new();
 
     queue.extend(
-        in_degree.iter()
-            .filter_map(|(&page, &degree)| if degree == 0 { Some(page) } else { None })
+        in_degree
+            .iter()
+            .filter_map(|(&page, &degree)| if degree == 0 { Some(page) } else { None }),
     );
 
     while let Some(current) = queue.pop_front() {
