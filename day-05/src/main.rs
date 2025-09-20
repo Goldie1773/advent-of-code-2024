@@ -1,4 +1,7 @@
-use std::{collections::{HashMap, HashSet, VecDeque}, iter};
+use std::{
+    collections::{HashMap, HashSet, VecDeque},
+    iter,
+};
 
 use aoc_common::read_file_manifest;
 
@@ -11,15 +14,15 @@ fn split_input(input: &str) -> (&str, &str) {
 
 fn reorder_part_two(input: &Vec<u32>, order_map: &HashMap<u32, Vec<u32>>) -> u32 {
     let pages_set: HashSet<u32> = input.iter().cloned().collect();
-    
+
     let mut adj_list: HashMap<u32, Vec<u32>> = HashMap::new();
     let mut in_degree: HashMap<u32, usize> = HashMap::new();
-    
+
     for &page in input {
         in_degree.insert(page, 0);
         adj_list.insert(page, Vec::new());
     }
-    
+
     for &page in input {
         if let Some(dependents) = order_map.get(&page) {
             for &dependent in dependents {
@@ -30,20 +33,20 @@ fn reorder_part_two(input: &Vec<u32>, order_map: &HashMap<u32, Vec<u32>>) -> u32
             }
         }
     }
-    
+
     // Topological sort using Kahn's algorithm
     let mut queue: VecDeque<u32> = VecDeque::new();
     let mut sorted_order: Vec<u32> = Vec::new();
-    
+
     for (&page, &degree) in &in_degree {
         if degree == 0 {
             queue.push_back(page);
         }
     }
-    
+
     while let Some(current) = queue.pop_front() {
         sorted_order.push(current);
-        
+
         if let Some(dependents) = adj_list.get(&current) {
             for &dependent in dependents {
                 let degree = in_degree.get_mut(&dependent).unwrap();
@@ -54,7 +57,7 @@ fn reorder_part_two(input: &Vec<u32>, order_map: &HashMap<u32, Vec<u32>>) -> u32
             }
         }
     }
-    
+
     // Return the middle element
     sorted_order[sorted_order.len() / 2]
 }
@@ -101,7 +104,7 @@ fn main() {
 
         if valid {
             continue; // Part Two
-            // total_sum += middle_num; // (Part One)
+                      // total_sum += middle_num; // (Part One)
         } else {
             // continue; // Part One)
             total_sum += reorder_part_two(&update, &order_map) // For part Two
