@@ -30,7 +30,7 @@ impl Direction {
     }
 }
 
-fn parse_grid_and_find_guard(input: String, guard: char) -> (Vec<Vec<char>>, (isize, isize)) {
+fn parse_grid_and_find_guard(input: &str, guard: char) -> (Vec<Vec<char>>, (isize, isize)) {
     // Using String rather than &str so input is consumed by the function and can be dropped after being parsed into the grid
     let mut grid = Vec::new();
     let mut guard_pos = None;
@@ -46,16 +46,12 @@ fn parse_grid_and_find_guard(input: String, guard: char) -> (Vec<Vec<char>>, (is
     (grid, guard_pos.expect("Grid will always contain a guard."))
 }
 
-fn move_guard(pos: (isize, isize), dir: Direction) -> (isize, isize) {
-    let (row, col) = pos;
-
-    let (dr, dc) = dir.offset();
-    (row + dr, col + dc)
+fn is_in_bounds(pos: (isize, isize), rows: isize, cols: isize) -> bool {
+    pos.0 >= 0 && pos.1 >= 0 && pos.0 < rows && pos.1 < cols
 }
 
 fn main() {
-    let input = read_file_manifest!("input.txt");
-    let (grid, mut guard_pos) = parse_grid_and_find_guard(input, '^');
+    let (grid, mut guard_pos) = parse_grid_and_find_guard(&read_file_manifest!("input.txt"), '^');
     let mut dir = Direction::Up;
     let mut visited: HashSet<(isize, isize)> = HashSet::new();
 
@@ -63,32 +59,25 @@ fn main() {
     // If the guard is blocked, rotate 90 degrees right, otherwise the guard moves forward
     // Repeats until the guard has left the area
 
+    let grid_rows = grid.len() as isize;
+    let grid_cols = grid[0].len() as isize;
+
     loop {
         visited.insert(guard_pos);
         let (dr, dc) = dir.offset();
         let next_pos = (guard_pos.0 + dr, guard_pos.1 + dc);
 
-        if next_pos.0 < 0
-            || next_pos.1 < 0
-            || next_pos.0 >= grid.len() as isize
-            || next_pos.1 >= grid[0].len() as isize
-        {
+        if !is_in_bounds(next_pos, grid_rows, grid_cols) {
             break;
         }
 
-        let row = next_pos.0 as usize;
-        let col = next_pos.1 as usize;
-        let cell = grid[row][col];
+        let cell = grid[next_pos.0 as usize][next_pos.1 as usize];
 
         // println!("Current position is {guard_pos:?}, next position is next_pos {next_pos:?}, the cell contains {cell}");
         match cell {
-            '.' | '^' => {
-                guard_pos = move_guard(guard_pos, dir);
-            }
-            '#' => {
-                dir = dir.rotate_right();
-            }
-            _ => panic!("Grid should only contain '.' or '#'."),
+            '.' | '^' => guard_pos = next_pos,
+            '#' => dir = dir.rotate_right(),
+            _ => unreachable!("Grid should only contain '.' or '#'."),
         }
     }
 
