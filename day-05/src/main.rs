@@ -69,7 +69,7 @@ fn main() {
         let mut curr_order = order.split("|");
         let key = curr_order.next().unwrap().parse::<u32>().unwrap();
         let value = curr_order.next().unwrap().parse::<u32>().unwrap();
-        order_map.entry(key).or_insert_with(Vec::new).push(value);
+        order_map.entry(key).or_default().push(value);
     }
 
     let mut total_sum = 0;
@@ -85,7 +85,7 @@ fn main() {
         let mut stack: HashSet<u32> = HashSet::new();
 
         for value in &update {
-            if let Some(values) = order_map.get(&value) {
+            if let Some(values) = order_map.get(value) {
                 for num in values {
                     if stack.contains(num) {
                         valid = false;
