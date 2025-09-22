@@ -1,5 +1,5 @@
-use std::collections::HashSet;
 use rayon::prelude::*;
+use std::collections::HashSet;
 
 use aoc_common::read_file_manifest;
 
@@ -47,12 +47,18 @@ fn parse_grid_and_find_guard(input: &str, guard: char) -> (Vec<Vec<char>>, (isiz
     (grid, guard_pos.expect("Grid will always contain a guard."))
 }
 
-
 fn is_in_bounds(pos: (isize, isize), rows: isize, cols: isize) -> bool {
     pos.0 >= 0 && pos.1 >= 0 && pos.0 < rows && pos.1 < cols
 }
 
-fn original_path(grid: &Vec<Vec<char>>, mut guard_pos: (isize, isize), mut dir: Direction, visited: &mut HashSet<(isize, isize)>, grid_rows: isize, grid_cols: isize) {
+fn original_path(
+    grid: &Vec<Vec<char>>,
+    mut guard_pos: (isize, isize),
+    mut dir: Direction,
+    visited: &mut HashSet<(isize, isize)>,
+    grid_rows: isize,
+    grid_cols: isize,
+) {
     loop {
         visited.insert(guard_pos);
         let (dr, dc) = dir.offset();
@@ -73,14 +79,20 @@ fn original_path(grid: &Vec<Vec<char>>, mut guard_pos: (isize, isize), mut dir: 
     }
 }
 
-fn check_loop(grid: &Vec<Vec<char>>, mut guard_pos: (isize, isize), mut dir: Direction, grid_rows: isize, grid_cols: isize) -> bool {
+fn check_loop(
+    grid: &Vec<Vec<char>>,
+    mut guard_pos: (isize, isize),
+    mut dir: Direction,
+    grid_rows: isize,
+    grid_cols: isize,
+) -> bool {
     let mut visited_states: HashSet<((isize, isize), Direction)> = HashSet::new();
     loop {
         let state = (guard_pos, dir);
         if visited_states.contains(&state) {
-            return true;  // Same position AND direction = loop!
+            return true; // Same position AND direction = loop!
         }
-    
+
         visited_states.insert(state);
         let (dr, dc) = dir.offset();
         let next_pos = (guard_pos.0 + dr, guard_pos.1 + dc);
@@ -111,23 +123,24 @@ fn main() {
     let grid_rows = grid.len() as isize;
     let grid_cols = grid[0].len() as isize;
 
-
     original_path(&grid, guard_pos, dir, &mut visited, grid_rows, grid_cols);
 
     // Optimised brute force search using rayon for parellisation
-    let num_obstacle_pos = visited.par_iter().filter(|(x, y)| {
-        let x = *x as usize;
-        let y = *y as usize;
-        let mut grid_clone = grid.clone();
-        let temp_symbol = grid_clone[x][y];
-        grid_clone[x][y] = '#';
+    let num_obstacle_pos = visited
+        .par_iter()
+        .filter(|(x, y)| {
+            let x = *x as usize;
+            let y = *y as usize;
+            let mut grid_clone = grid.clone();
+            let temp_symbol = grid_clone[x][y];
+            grid_clone[x][y] = '#';
 
-        let result = check_loop(&grid_clone, guard_pos, dir, grid_rows, grid_cols);
+            let result = check_loop(&grid_clone, guard_pos, dir, grid_rows, grid_cols);
 
-        grid_clone[x][y] = temp_symbol;
-        result
-    }).count();
+            grid_clone[x][y] = temp_symbol;
+            result
+        })
+        .count();
 
     println!("The nubmber of distinct locations for an obstacle is {num_obstacle_pos}");
 }
-
