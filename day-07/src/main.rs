@@ -16,31 +16,33 @@ fn target_in_permutations(nums: &[u64], target: u64) -> bool {
             acc = ops[op](acc, nums[i + 1]);
         }
         if acc == target {
-          return true;
+            return true;
         } else {
-          continue;
+            continue;
         }
     }
-    return false
+    return false;
 }
 
 fn main() {
     let input = read_file_manifest!("input.txt");
-    
+
     let re = Regex::new(r"(?<target>[0-9]+): (?<num_stream>.+)").unwrap();
     let mut total_cal_sum = 0;
 
     for line in input.lines() {
-      let caps = re.captures(line).unwrap();
-      let target: &u64= &caps["target"].parse::<u64>().unwrap();
-      let nums: Vec<u64> = caps["num_stream"].split(" ").map(|x| x.parse::<u64>().unwrap()).collect();
+        let caps = re.captures(line).unwrap();
+        let target: &u64 = &caps["target"].parse::<u64>().unwrap();
+        let nums: Vec<u64> = caps["num_stream"]
+            .split(" ")
+            .map(|x| x.parse::<u64>().unwrap())
+            .collect();
 
-      if target_in_permutations(&nums, *target) {
-        total_cal_sum += target
-      } else {
-        continue;
-      }
-
+        if target_in_permutations(&nums, *target) {
+            total_cal_sum += target
+        } else {
+            continue;
+        }
     }
     println!("Total calibration result is {total_cal_sum}");
 }
