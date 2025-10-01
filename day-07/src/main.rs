@@ -1,12 +1,8 @@
 use aoc_common::read_file_manifest;
-use rayon::str::ParallelString;
 use rayon::iter::ParallelIterator;
+use rayon::str::ParallelString;
 
-const OPS: [fn(u64, u64) -> u64; 3] = [
-    |a, b| a + b,
-    |a, b| a * b,
-    |a, b| concat(a, b)
-  ];
+const OPS: [fn(u64, u64) -> u64; 3] = [|a, b| a + b, |a, b| a * b, |a, b| concat(a, b)];
 
 fn target_in_permutations(nums: &[u64], target: u64) -> bool {
     let n = nums.len();
