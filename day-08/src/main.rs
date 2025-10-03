@@ -1,6 +1,7 @@
 use std::{collections::{HashMap, HashSet}, hash::Hash, ops::{Add, Sub}};
 use aoc_common::read_file_manifest;
 use itertools::Itertools;
+use std::fmt;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 struct Point {
@@ -40,6 +41,26 @@ impl Sub for Point {
     }
 }
 
+// Helper functions for debugging by printing hashset in a sorted order
+
+// impl fmt::Display for Point {
+//     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+//         write!(f, "({}, {})", self.x, self.y)
+//     }
+// }
+// struct PointSet<'a>(&'a HashSet<Point>);
+
+// impl<'a> fmt::Display for PointSet<'a> {
+//     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+//         let mut points: Vec<_> = self.0.iter().collect();
+//         points.sort_by_key(|p| (p.y, p.x));
+//         for point in points {
+//             writeln!(f, "{point}")?;
+//         }
+//         Ok(())
+//     }
+// }
+
 fn distance_between_points(a: &Point, b: &Point) -> Point {
     let diff = *a - *b;
     Point { x: diff.x, y: diff.y }
@@ -65,25 +86,42 @@ fn main() {
     }
 
     for (_sym, points) in &node_map {
+        
+        // Part 2 Only
+        if points.len() >= 2 {
+            for point in points {
+                antinode_map.insert(*point);
+            }
+        }
+
         for pair in points.iter().combinations(2) {
             let p1 = pair[0];
             let p2 = pair[1];
 
             let dist_between = distance_between_points(p2, p1);
 
-            let an1 = *p1 - dist_between;
-            let an2 = *p2 + dist_between;
+            let mut an1 = *p1 - dist_between;
+            let mut an2 = *p2 + dist_between;
 
-            if an1.is_in_bounds(&grid_width, &grid_len) {
-                antinode_map.insert(an1);
+            while an1.is_in_bounds(&grid_width, &grid_len) || an2.is_in_bounds(&grid_width, &grid_len) {
+                if an1.is_in_bounds(&grid_width, &grid_len) {
+                    antinode_map.insert(an1);
+                }
+
+                if an2.is_in_bounds(&grid_width, &grid_len) {
+                    antinode_map.insert(an2);
+                }
+
+                an1 = an1 - dist_between;
+                an2 = an2 + dist_between;
             }
 
-            if an2.is_in_bounds(&grid_width, &grid_len) {
-                antinode_map.insert(an2);
-            }
+            
 
         }
     }
+
+    // println!("{}\n", PointSet(&antinode_map)); // Debugging Purposes
 
     println!("The number of unique anti-node locations is {}", antinode_map.len());
 }
