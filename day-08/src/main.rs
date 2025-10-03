@@ -1,10 +1,6 @@
 use aoc_common::read_file_manifest;
 use itertools::Itertools;
-use std::{
-    collections::{HashMap, HashSet},
-    hash::Hash,
-    ops::{Add, Sub},
-};
+use std::collections::{HashMap, HashSet};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 struct Point {
@@ -13,126 +9,137 @@ struct Point {
 }
 
 impl Point {
-    fn new(x: usize, y: usize) -> Point {
-        Point {
+    const fn new(x: usize, y: usize) -> Self {
+        Self {
             x: x as i32,
             y: y as i32,
         }
     }
 
-    fn is_in_bounds(self, grid_width: &usize, grid_length: &usize) -> bool {
-        self.x >= 0 && self.x < *grid_length as i32 && self.y >= 0 && self.y < *grid_width as i32
+    const fn is_in_bounds(self, rows: usize, cols: usize) -> bool {
+        self.x >= 0 && self.x < cols as i32 && self.y >= 0 && self.y < rows as i32
     }
-}
 
-impl Add for Point {
-    type Output = Point;
-
-    fn add(self, other: Point) -> Point {
-        Point {
-            x: self.x + other.x,
-            y: self.y + other.y,
+    const fn vector_to(self, other: Self) -> Self {
+        Self {
+            x: other.x - self.x,
+            y: other.y - self.y,
         }
     }
-}
 
-impl Sub for Point {
-    type Output = Point;
-
-    fn sub(self, other: Point) -> Point {
-        Point {
-            x: self.x - other.x,
-            y: self.y - other.y,
+    const fn translate(self, vector: Self) -> Self {
+        Self {
+            x: self.x + vector.x,
+            y: self.y + vector.y,
         }
     }
+
+    /// Calculate antinodes for a pair of points (Part 1 logic)
+    const fn antinodes(self, other: Self) -> (Self, Self) {
+        (
+            Self {
+                x: 2 * self.x - other.x,
+                y: 2 * self.y - other.y,
+            },
+            Self {
+                x: 2 * other.x - self.x,
+                y: 2 * other.y - self.y,
+            },
+        )
+    }
 }
 
-// Helper functions for debugging by printing hashset in a sorted order
+fn parse_antenna_map(grid: &[&str]) -> HashMap<char, Vec<Point>> {
+    grid.iter()
+        .enumerate()
+        .flat_map(|(y, row)| {
+            row.chars()
+                .enumerate()
+                .filter(|(_, c)| *c != '.')
+                .map(move |(x, c)| (c, Point::new(x, y)))
+        })
+        .fold(HashMap::new(), |mut map, (symbol, point)| {
+            map.entry(symbol).or_insert_with(Vec::new).push(point);
+            map
+        })
+}
 
-// impl fmt::Display for Point {
-//     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-//         write!(f, "({}, {})", self.x, self.y)
-//     }
-// }
-// struct PointSet<'a>(&'a HashSet<Point>);
+fn find_antinodes_part1(
+    node_map: &HashMap<char, Vec<Point>>,
+    rows: usize,
+    cols: usize,
+) -> HashSet<Point> {
+    let mut antinodes = HashSet::new();
 
-// impl<'a> fmt::Display for PointSet<'a> {
-//     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-//         let mut points: Vec<_> = self.0.iter().collect();
-//         points.sort_by_key(|p| (p.y, p.x));
-//         for point in points {
-//             writeln!(f, "{point}")?;
-//         }
-//         Ok(())
-//     }
-// }
+    for points in node_map.values() {
+        for pair in points.iter().combinations(2) {
+            let (an1, an2) = pair[0].antinodes(*pair[1]);
 
-fn distance_between_points(a: &Point, b: &Point) -> Point {
-    let diff = *a - *b;
-    Point {
-        x: diff.x,
-        y: diff.y,
+            if an1.is_in_bounds(rows, cols) {
+                antinodes.insert(an1);
+            }
+            if an2.is_in_bounds(rows, cols) {
+                antinodes.insert(an2);
+            }
+        }
     }
+
+    antinodes
+}
+
+fn find_antinodes_part2(
+    node_map: &HashMap<char, Vec<Point>>,
+    rows: usize,
+    cols: usize,
+) -> HashSet<Point> {
+    let mut antinodes = HashSet::new();
+
+    for points in node_map.values().filter(|p| p.len() >= 2) {
+        
+        antinodes.extend(points.iter().copied());
+
+        
+        for pair in points.iter().combinations(2) {
+            let (p1, p2) = (*pair[0], *pair[1]);
+            let vector = p1.vector_to(p2);
+
+            
+            let mut current = p1.translate(Point { x: -vector.x, y: -vector.y });
+            while current.is_in_bounds(rows, cols) {
+                antinodes.insert(current);
+                current = current.translate(Point { x: -vector.x, y: -vector.y });
+            }
+
+            
+            current = p2.translate(vector);
+            while current.is_in_bounds(rows, cols) {
+                antinodes.insert(current);
+                current = current.translate(vector);
+            }
+        }
+    }
+
+    antinodes
 }
 
 fn main() {
     let input = read_file_manifest!("input.txt");
     let grid: Vec<&str> = input.lines().collect();
-    let grid_width = grid.len();
-    let grid_len = grid.first().map(|row| row.len()).unwrap_or(0);
+    let (rows, cols) = (grid.len(), grid.first().map_or(0, |row| row.len()));
 
-    let mut node_map: HashMap<char, Vec<Point>> = HashMap::new();
-    let mut antinode_map: HashSet<Point> = HashSet::new();
-
-    for (idx_y, row) in grid.iter().enumerate() {
-        for (idx_x, sym) in row.chars().enumerate() {
-            if sym != '.' {
-                let point = Point::new(idx_x, idx_y);
-                node_map.entry(sym).or_insert_with(Vec::new).push(point);
-            }
-        }
-    }
-
-    for (_sym, points) in &node_map {
-        
-        // Part 2 Only
-        if points.len() >= 2 {
-            for point in points {
-                antinode_map.insert(*point);
-            }
-        }
-
-        for pair in points.iter().combinations(2) {
-            let p1 = pair[0];
-            let p2 = pair[1];
-
-            let dist_between = distance_between_points(p2, p1);
-
-            let mut an1 = *p1 - dist_between;
-            let mut an2 = *p2 + dist_between;
-
-            while an1.is_in_bounds(&grid_width, &grid_len) || an2.is_in_bounds(&grid_width, &grid_len) {
-                if an1.is_in_bounds(&grid_width, &grid_len) {
-                    antinode_map.insert(an1);
-                }
-
-                if an2.is_in_bounds(&grid_width, &grid_len) {
-                    antinode_map.insert(an2);
-                }
-
-                an1 = an1 - dist_between;
-                an2 = an2 + dist_between;
-            }
-
-            
-
-        }
-    }
-
-    // println!("{}\n", PointSet(&antinode_map)); // Debugging Purposes
-
+    let node_map = parse_antenna_map(&grid);
+    
+    // Part 1: Only immediate antinodes (one on each side)
+    let antinodes_part1 = find_antinodes_part1(&node_map, rows, cols);
     println!(
-        "The number of unique anti-node locations is {}",
-        antinode_map.len()
+        "Part 1 - The number of unique anti-node locations is {}",
+        antinodes_part1.len()
+    );
+
+    // Part 2: All collinear antinodes (resonant harmonics)
+    let antinodes_part2 = find_antinodes_part2(&node_map, rows, cols);
+    println!(
+        "Part 2 - The number of unique anti-node locations is {}",
+        antinodes_part2.len()
     );
 }
