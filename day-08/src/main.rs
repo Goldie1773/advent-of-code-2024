@@ -94,7 +94,6 @@ fn main() {
     }
 
     for (_sym, points) in &node_map {
-        
         // Part 2 Only
         if points.len() >= 2 {
             for point in points {
@@ -111,7 +110,9 @@ fn main() {
             let mut an1 = *p1 - dist_between;
             let mut an2 = *p2 + dist_between;
 
-            while an1.is_in_bounds(&grid_width, &grid_len) || an2.is_in_bounds(&grid_width, &grid_len) {
+            while an1.is_in_bounds(&grid_width, &grid_len)
+                || an2.is_in_bounds(&grid_width, &grid_len)
+            {
                 if an1.is_in_bounds(&grid_width, &grid_len) {
                     antinode_map.insert(an1);
                 }
@@ -123,9 +124,6 @@ fn main() {
                 an1 = an1 - dist_between;
                 an2 = an2 + dist_between;
             }
-
-            
-
         }
     }
 
