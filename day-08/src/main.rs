@@ -95,22 +95,24 @@ fn find_antinodes_part2(
     let mut antinodes = HashSet::new();
 
     for points in node_map.values().filter(|p| p.len() >= 2) {
-        
         antinodes.extend(points.iter().copied());
 
-        
         for pair in points.iter().combinations(2) {
             let (p1, p2) = (*pair[0], *pair[1]);
             let vector = p1.vector_to(p2);
 
-            
-            let mut current = p1.translate(Point { x: -vector.x, y: -vector.y });
+            let mut current = p1.translate(Point {
+                x: -vector.x,
+                y: -vector.y,
+            });
             while current.is_in_bounds(rows, cols) {
                 antinodes.insert(current);
-                current = current.translate(Point { x: -vector.x, y: -vector.y });
+                current = current.translate(Point {
+                    x: -vector.x,
+                    y: -vector.y,
+                });
             }
 
-            
             current = p2.translate(vector);
             while current.is_in_bounds(rows, cols) {
                 antinodes.insert(current);
@@ -128,7 +130,7 @@ fn main() {
     let (rows, cols) = (grid.len(), grid.first().map_or(0, |row| row.len()));
 
     let node_map = parse_antenna_map(&grid);
-    
+
     // Part 1: Only immediate antinodes (one on each side)
     let antinodes_part1 = find_antinodes_part1(&node_map, rows, cols);
     println!(
