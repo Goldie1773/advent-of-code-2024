@@ -1,17 +1,23 @@
-use std::{collections::{HashMap, HashSet}, hash::Hash, ops::{Add, Sub}};
 use aoc_common::read_file_manifest;
 use itertools::Itertools;
-use std::fmt;
+use std::{
+    collections::{HashMap, HashSet},
+    hash::Hash,
+    ops::{Add, Sub},
+};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 struct Point {
     x: i32,
-    y: i32
+    y: i32,
 }
 
 impl Point {
     fn new(x: usize, y: usize) -> Point {
-        Point { x: x as i32, y: y as i32 }
+        Point {
+            x: x as i32,
+            y: y as i32,
+        }
     }
 
     fn is_in_bounds(self, grid_width: &usize, grid_length: &usize) -> bool {
@@ -63,7 +69,10 @@ impl Sub for Point {
 
 fn distance_between_points(a: &Point, b: &Point) -> Point {
     let diff = *a - *b;
-    Point { x: diff.x, y: diff.y }
+    Point {
+        x: diff.x,
+        y: diff.y,
+    }
 }
 
 fn main() {
@@ -77,7 +86,6 @@ fn main() {
 
     for (idx_y, row) in grid.iter().enumerate() {
         for (idx_x, sym) in row.chars().enumerate() {
-
             if sym != '.' {
                 let point = Point::new(idx_x, idx_y);
                 node_map.entry(sym).or_insert_with(Vec::new).push(point);
@@ -123,5 +131,8 @@ fn main() {
 
     // println!("{}\n", PointSet(&antinode_map)); // Debugging Purposes
 
-    println!("The number of unique anti-node locations is {}", antinode_map.len());
+    println!(
+        "The number of unique anti-node locations is {}",
+        antinode_map.len()
+    );
 }
